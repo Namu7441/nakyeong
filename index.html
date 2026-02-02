@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nakyeong | Intraday Specialist</title>
     
-    <!-- 필수 라이브러리 로딩 -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -14,7 +13,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* CSS 영역: @keyframes 에러 방지를 위해 정확한 구문 사용 */
         body {
             font-family: 'Inter', -apple-system, sans-serif;
             background-color: #fbfbfd;
@@ -54,9 +52,11 @@
     <div id="root"></div>
 
     <script type="text/babel">
+console.log("React", React);
+console.log("ReactDOM", ReactDOM);
+console.log("Babel OK");
         const { useState, useEffect } = React;
 
-        /* 에러가 났던 Icon 컴포넌트 수정본 */
         const Icon = ({ name, size = 24, className = "" }) => {
             const icons = {
                 Chart: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>,
