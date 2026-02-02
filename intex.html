@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Park Nakyeong | RCMP</title>
+    
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #fbfbfd;
+            color: #1d1d1f;
+            margin: 0;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up { animation: fade-in-up 1s ease-out forwards; }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-500 { animation-delay: 0.5s; }
+
+        /* Blob Animation */
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+            animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- Standard SVG Icons for Stability ---
+        const Icons = {
+            ChevronDown: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-bounce opacity-50"><path d="m7 13 5 5 5-5"/><path d="m7 6 5 5 5-5"/></svg>,
+            BarChart: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></svg>,
+            Clock: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+            Users: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+            Zap: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+            Code: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>,
+            Mail: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>,
+            Github: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 1.15 6.44 1.54a3.37 3.37 0 0 0-.94-2.61v3.87"/></svg>
+        };
+
+        const Navbar = () => (
+            <nav className="fixed top-0 w-full z-50 glass">
+                <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+                    <div className="font-semibold text-lg tracking-tight flex items-center gap-2">
+                        <span className="w-3 h-3 bg-black rounded-full block"></span>
+                        Nakyeong
+                    </div>
+                    <div className="hidden md:flex gap-8 text-sm font-medium text-gray-500">
+                        <a href="#about" className="hover:text-black transition-colors">About</a>
+                        <a href="#expertise" className="hover:text-black transition-colors">Expertise</a>
+                        <a href="#projects" className="hover:text-black transition-colors">Project</a>
+                    </div>
+                    <a href="mailto:namu7441@gmail.com" className="bg-black text-white text-xs px-4 py-2 rounded-full hover:bg-gray-800 transition-colors">
+                        Get in Touch
+                    </a>
+                </div>
+            </nav>
+        );
+
+        const Hero = () => (
+            <section className="h-screen flex flex-col justify-center items-center text-center px-6 relative overflow-hidden bg-white">
+                <div className="absolute inset-0 z-0 opacity-30">
+                     <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+                     <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-purple-100 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+                </div>
+                <div className="z-10 max-w-4xl mx-auto">
+                    <p className="text-gray-500 font-medium mb-4 text-lg md:text-xl tracking-wide animate-fade-in-up">
+                      Resolutions Generalist
+                    </p>
+                    <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 mb-6 animate-fade-in-up delay-100 leading-tight">
+                        Nakyeong.<br />
+                        <span className="text-gray-400">Thank you for visiting.</span>
+                    </h1>
+                    <p className="text-xl md:text-2xl text-gray-600 max-w-2xl mx-auto mt-8 animate-fade-in-up delay-200 font-light leading-relaxed">
+                        데이터와 현장의 목소리를 연결하여<br className="hidden md:block"/>
+                        최적의 운영 효율과 경험을 만듭니다.
+                    </p>
+                </div>
+                <div className="absolute bottom-10 animate-fade-in-up delay-500">
+                    <a href="#about" className="flex flex-col items-center gap-2 text-gray-400 text-sm hover:text-black transition-colors">
+                        Discover
+                        <Icons.ChevronDown />
+                    </a>
+                </div>
+            </section>
+        );
+
+        const About = () => (
+            <section id="about" className="py-24 px-6 bg-white">
+                <div className="max-w-6xl mx-auto">
+                    <div className="mb-16 text-center">
+                        <h2 className="text-4xl font-bold tracking-tight mb-4">Core Competencies</h2>
+                        <p className="text-gray-500 max-w-2xl mx-auto leading-relaxed">
+                            실시간 채널 변화에 따른 Queue Time과 Abandon Rate의 상관관계를 분석하며,<br/>
+                            최상의 고객 경험을 위한 최적의 균형을 유지합니다.
+                        </p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="col-span-1 md:col-span-2 bg-gray-50 rounded-3xl p-8 border border-gray-100 relative overflow-hidden group">
+                            <div className="relative z-10">
+                                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6 text-blue-600">
+                                    <Icons.BarChart />
+                                </div>
+                                <h3 className="text-2xl font-bold mb-2">Data-Driven Improvement</h3>
+                                <p className="text-gray-600 leading-relaxed mb-4">
+                                    Dialog 분석 지표를 활용해 상담 트렌드를 식별합니다. Conversion Path 단축과 Customer Effort 감소를 통해 실질적인 지표 개선을 이끌어냅니다.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="col-span-1 bg-black text-white rounded-3xl p-8 shadow-lg">
+                            <div className="w-12 h-12 bg-gray-800 rounded-2xl flex items-center justify-center mb-6 text-yellow-400">
+                                <Icons.Clock />
+                            </div>
+                            <h3 className="text-2xl font-bold mb-2">Real-time Monitoring</h3>
+                            <p className="text-gray-400 text-sm leading-relaxed">
+                                다각화된 채널 모니터링을 통해 운영 리소스를 효율적으로 배분하며, Duty Rotation 부담을 최소화하는 안정적인 운영을 지향합니다.
+                            </p>
+                        </div>
+                        <div className="bg-gray-50 rounded-3xl p-8 border border-gray-100">
+                            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-4 text-green-600">
+                                <Icons.Users />
+                            </div>
+                            <h3 className="text-xl font-bold mb-2">Flexible Scheduling</h3>
+                            <p className="text-gray-600 text-sm leading-relaxed">
+                                동료들과의 유연한 Schedule Swap과 탄력적인 인력 운영을 통해 돌발 상황에도 흔들림 없는 지표 방어를 수행합니다.
+                            </p>
+                        </div>
+                        <div className="bg-blue-50 rounded-3xl p-8 border border-blue-100">
+                            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-4 text-blue-600">
+                                <Icons.Zap />
+                            </div>
+                            <h3 className="text-xl font-bold mb-2">Fast Adapter</h3>
+                            <p className="text-gray-600 text-sm leading-relaxed">
+                                PIR, Open messaging 등 신규 시스템 도입 시 주도적으로 테스트를 진행하고 현장 중심의 피드백을 공유하여 안정적인 정착을 돕습니다.
+                            </p>
+                        </div>
+                        <div className="col-span-1 bg-white rounded-3xl p-8 border border-gray-200 hover:border-gray-300 transition-all group flex flex-col justify-between">
+                            <div>
+                                <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center shadow-sm mb-4 text-purple-600">
+                                    <Icons.Code />
+                                </div>
+                                <h3 className="text-xl font-bold mb-1">Tech Experience</h3>
+                                <p className="text-gray-500 text-xs mb-4">CS Support Tooling</p>
+                                <p className="text-gray-600 text-sm">팀 이벤트 스코어 실시간 확인 시스템 등 운영 지원을 위한 웹 개발 역량을 보유하고 있습니다.</p>
+                            </div>
+                            <a href="https://namu7441.github.io/nakyeong.github.io" target="_blank" className="text-sm font-semibold text-blue-600 mt-4 inline-block">
+                                View Work →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
+
+        const Philosophy = () => (
+            <section id="expertise" className="py-32 bg-gray-50">
+                <div className="max-w-4xl mx-auto px-6 text-center">
+                    <h2 className="text-3xl md:text-5xl font-bold leading-tight tracking-tight mb-8 text-gray-900">
+                        "Target과 Actual 사이의<br /> 간극을 줄이는 브릿지가 되겠습니다."
+                    </h2>
+                    <p className="text-lg md:text-xl text-gray-500 leading-relaxed font-light">
+                        비즈니스 이해도와 협업 경험을 바탕으로,<br />
+                        <span className="text-black font-medium">Customer</span>와 <span className="text-black font-medium">Co-worker</span>가<br />
+                        모두 신뢰할 수 있는 최적의 운영 지표를 만듭니다.
+                    </p>
+                </div>
+            </section>
+        );
+
+        const Footer = () => (
+            <footer id="contact" className="bg-white py-12 border-t border-gray-100">
+                <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div className="text-center md:text-left">
+                        <div className="font-bold text-xl mb-1">Park Nakyeong</div>
+                        <p className="text-gray-500 text-sm tracking-wide uppercase">Resolutions Generalist</p>
+                    </div>
+                    <div className="flex gap-8">
+                        <a href="mailto: tinamu7441@gmail.com" className="flex items-center gap-2 text-gray-600 hover:text-black transition-colors">
+                            <Icons.Mail />
+                            <span>Email</span>
+                        </a>
+                        <a href="https://github.com/namu7441" target="_blank" className="flex items-center gap-2 text-gray-600 hover:text-black transition-colors">
+                            <Icons.Github />
+                            <span>GitHub</span>
+                        </a>
+                    </div>
+                </div>
+                <div className="text-center mt-12 text-xs text-gray-400 tracking-widest">
+                    &copy; 2026 NAKYEONG. ALL RIGHTS RESERVED.
+                </div>
+            </footer>
+        );
+
+        const App = () => (
+            <div className="antialiased selection:bg-blue-100 selection:text-blue-900">
+                <Navbar />
+                <Hero />
+                <About />
+                <Philosophy />
+                <Footer />
+            </div>
+        );
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
